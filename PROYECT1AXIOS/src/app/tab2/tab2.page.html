@@ -1,0 +1,49 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Contactos Recibidos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <ion-refresher slot="fixed" (ionRefresh)="cargarContactos($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Contactos Recibidos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Estado: cargando -->
+  <div class="estado" *ngIf="cargando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando contactos...</p>
+  </div>
+
+  <!-- Estado: error -->
+  <div class="estado error" *ngIf="!cargando && error">
+    <p>{{ error }}</p>
+    <p class="ayuda">Verifica que tu API PHP esté corriendo (XAMPP: Apache + MySQL en verde).</p>
+  </div>
+
+  <!-- Estado: vacío -->
+  <div class="estado" *ngIf="!cargando && !error && contactos.length === 0">
+    <p>Todavía no hay contactos guardados.</p>
+    <p class="ayuda">Ve al formulario del Tab1 y envía uno de prueba.</p>
+  </div>
+
+  <!-- Lista de contactos -->
+  <ion-list *ngIf="!cargando && !error && contactos.length > 0">
+    <ion-item *ngFor="let c of contactos">
+      <ion-label>
+        <h2>{{ c.nombre }} <span *ngIf="c.empresa"> — {{ c.empresa }}</span></h2>
+        <p>{{ c.email }} · {{ c.telefono }}</p>
+        <p class="mensaje">{{ c.mensaje }}</p>
+      </ion-label>
+      <ion-note slot="end">{{ c.created_at }}</ion-note>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

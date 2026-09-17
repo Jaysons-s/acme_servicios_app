@@ -1,0 +1,97 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Contacto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="contenedor">
+    <h1 class="logo"><span class="nombre-empresa">Acme</span> Servicios</h1>
+    <div class="wrapper animated bounceInLeft">
+      <div class="info-empresa">
+        <h3>Acme Servicios</h3>
+        <ul class="servicios">
+          <li><i class="fa fa-map-marker"></i> Calle Cualquiera, 44. 88880. Ciudad (Provincia)</li>
+          <li><i class="fa fa-mobile"></i> 555 555 000</li>
+          <li><i class="fa fa-envelope"></i> info&#64;empresa.com</li>
+        </ul>
+      </div>
+      <div class="contacto">
+        <h3>Enviar Correo</h3>
+
+        <form class="formulario" [formGroup]="contactoForm" (ngSubmit)="onSubmit()">
+          <p>
+            <label>Nombre</label>
+            <input type="text" formControlName="nombre" required>
+          </p>
+          <p>
+            <label>Empresa</label>
+            <input type="text" formControlName="empresa">
+          </p>
+          <p>
+            <label>Correo</label>
+            <input type="email" formControlName="email" required>
+          </p>
+          <p>
+            <label>Teléfono</label>
+            <input type="text" formControlName="telefono" required>
+          </p>
+          <p class="full">
+            <label>Mensaje</label>
+            <textarea formControlName="mensaje" required></textarea>
+          </p>
+          <p class="full">
+            <button class="boton-enviar" type="submit" [disabled]="enviando">
+              {{ enviando ? 'Enviando...' : 'Enviar' }}
+            </button>
+          </p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de ÉXITO -->
+  <ion-modal [isOpen]="modalExitoAbierto" (didDismiss)="cerrarModalExito()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="success">
+          <ion-title>¡Éxito!</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalExito()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-icon name="checkmark-circle-outline" color="success" style="font-size: 64px; display:block; margin: 0 auto 1rem;"></ion-icon>
+        <p style="text-align:center;">{{ mensajeExito }}</p>
+        <ion-button expand="block" color="success" (click)="cerrarModalExito()">Aceptar</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modal de ERROR -->
+  <ion-modal [isOpen]="modalErrorAbierto" (didDismiss)="cerrarModalError()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="danger">
+          <ion-title>Ocurrió un error</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalError()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-icon name="alert-circle-outline" color="danger" style="font-size: 64px; display:block; margin: 0 auto 1rem;"></ion-icon>
+        <p style="text-align:center;">{{ mensajeError }}</p>
+        <ion-button expand="block" color="danger" (click)="cerrarModalError()">Cerrar</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

@@ -1,0 +1,30 @@
+.estado {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--ion-color-medium);
+
+  ion-spinner {
+    margin-bottom: 0.75rem;
+  }
+
+  .ayuda {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  &.error {
+    color: var(--ion-color-danger);
+  }
+}
+
+ion-item {
+  h2 {
+    font-weight: 600;
+  }
+
+  .mensaje {
+    margin-top: 0.25rem;
+    font-style: italic;
+    opacity: 0.85;
+  }
+}
