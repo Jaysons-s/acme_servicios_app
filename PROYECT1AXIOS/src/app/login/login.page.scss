@@ -1,146 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap');
+
 :host {
-    display: block;
+  --navy: #14213D;
+  --blue: #2C5AA0;
+  --blue-light: #E8EEF6;
+  --slate: #5B6B7C;
+  --paper: #F6F8FA;
+  --border: #D7DEE7;
+}
+
+.login-content {
+  --background: var(--paper);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.login-wrapper {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+
+  @media screen and (min-width: 760px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.panel-marca {
+  background: var(--navy);
+  color: #fff;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+
+  .linea-decorativa {
+    position: absolute;
+    right: -20px;
+    top: 0;
     height: 100%;
-}
+    width: auto;
+    opacity: 0.5;
+  }
 
-.page {
-    position: fixed;
-    inset: 0;
-    background: #e2e2e5;
-    display: flex;
-    flex-direction: column;
-    place-content: center;
+  .marca-nombre {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: 2.1rem;
+    margin: 0 0 0.5rem;
+    position: relative;
     z-index: 1;
-}
 
-.container {
-    display: flex;
-    height: 320px;
-    margin: 0 auto;
-    width: 640px;
-
-    @media (max-width: 767px) {
-        flex-direction: column;
-        height: 630px;
-        width: 320px;
+    span {
+      color: var(--blue-light);
+      font-weight: 600;
     }
-}
+  }
 
-.left {
-    background: white;
-    height: calc(100% - 40px);
-    top: 20px;
+  .marca-tagline {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
     position: relative;
-    width: 50%;
+    z-index: 1;
+  }
+}
 
-    @media (max-width: 767px) {
-        height: 100%;
-        top: 0;
-        width: 100%;
-        max-height: 270px;
+.panel-form {
+  background: #fff;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+
+  h2 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .subtitulo {
+    color: var(--slate);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--slate);
+    margin-bottom: 0.35rem;
+    margin-top: 1.1rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: var(--navy);
+
+    &:focus {
+      outline: none;
+      border-color: var(--blue);
     }
-}
+  }
 
-.login {
-    font-size: 50px;
-    font-weight: 900;
-    margin: 50px 40px 40px;
-}
+  .error {
+    color: #B3261E;
+    font-size: 0.85rem;
+    margin-top: 0.9rem;
+  }
 
-.eula {
-    color: #999;
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 40px;
-}
-
-.right {
-    background: #474A59;
-    box-shadow: 0px 0px 40px 16px rgba(0, 0, 0, 0.22);
-    color: #F1F1F2;
-    position: relative;
-    width: 50%;
-
-    @media (max-width: 767px) {
-        width: 100%;
-        max-height: 350px;
-    }
-}
-
-.login-svg {
-    position: absolute;
-    width: 320px;
-
-    path {
-        fill: none;
-        stroke: url(#linearGradient);
-        stroke-width: 4;
-        stroke-dasharray: 240 1386;
-    }
-}
-
-.form {
-    margin: 40px;
-    position: absolute;
-
-    label {
-        color: #c2c2c5;
-        display: block;
-        font-size: 14px;
-        height: 16px;
-        margin-top: 20px;
-        margin-bottom: 5px;
-    }
-
-    input {
-        background: transparent;
-        border: 0;
-        color: #f2f2f2;
-        font-size: 20px;
-        height: 30px;
-        line-height: 30px;
-        outline: none !important;
-        width: 100%;
-    }
-
-    #submit {
-        color: #707075;
-        margin-top: 40px;
-        transition: color 300ms;
-        cursor: pointer;
-
-        &:focus,
-        &:active {
-            color: #f2f2f2;
-        }
-    }
-}
-
-.login {
-    font-size: 50px;
-    font-weight: 900;
-    margin: 50px 40px 40px;
-    color: #000; // 👈 fuerza el color negro, sin importar modo oscuro
-}
-
-.eula {
-    color: #999; // 👈 ya lo tenías, pero confírmalo
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 40px;
-}
-
-#submit {
-    color: #707075;
-    margin-top: 40px;
-    transition: color 300ms;
+  .boton-login {
+    width: 100%;
+    margin-top: 1.75rem;
+    padding: 0.85rem;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.92rem;
     cursor: pointer;
-    outline: none !important; // 👈 quita el contorno azul/rosa de foco
-    -webkit-tap-highlight-color: transparent;
 
-    &:focus,
-    &:active {
-        color: #f2f2f2;
-        outline: none !important; // 👈 asegura que tampoco aparezca al enfocar
+    &:hover,
+    &:focus {
+      background: var(--navy);
+      outline: 0;
     }
+  }
 }

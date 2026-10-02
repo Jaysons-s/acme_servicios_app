@@ -1,17 +1,44 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-title>Notas Locales</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- Formulario de alta / edición -->
+  <ion-item>
+    <ion-input label="Título" labelPlacement="stacked" [(ngModel)]="titulo" placeholder="Ej. Recordatorio"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-textarea label="Contenido" labelPlacement="stacked" [(ngModel)]="contenido" placeholder="Escribe algo..." rows="3"></ion-textarea>
+  </ion-item>
+
+  <div class="botones-form">
+    <ion-button expand="block" (click)="guardar()">
+      {{ editandoId !== null ? 'Guardar cambios' : 'Agregar nota' }}
+    </ion-button>
+    <ion-button expand="block" fill="outline" *ngIf="editandoId !== null" (click)="cancelarEdicion()">
+      Cancelar edición
+    </ion-button>
+  </div>
+
+  <!-- Lista de notas -->
+  <ion-list *ngIf="notas.length > 0">
+    <ion-item-sliding *ngFor="let nota of notas">
+      <ion-item (click)="editar(nota)" button="true">
+        <ion-label>
+          <h2>{{ nota.titulo }}</h2>
+          <p>{{ nota.contenido }}</p>
+          <ion-note>{{ nota.fecha }}</ion-note>
+        </ion-label>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="eliminar(nota.id)">Eliminar</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <p *ngIf="notas.length === 0" class="vacio">Todavía no hay notas guardadas.</p>
+
 </ion-content>

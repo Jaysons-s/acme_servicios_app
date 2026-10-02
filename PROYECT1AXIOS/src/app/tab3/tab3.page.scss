@@ -1,0 +1,22 @@
+.explicacion {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 1rem;
+}
+
+.botones-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.vacio {
+  text-align: center;
+  color: var(--ion-color-medium);
+  margin-top: 2rem;
+}
+
+ion-item h2 {
+  font-weight: 600;
+}

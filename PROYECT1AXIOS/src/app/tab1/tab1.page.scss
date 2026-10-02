@@ -1,93 +1,137 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap');
 
 :host {
-  --color-principal: #455a64;
-  --color-claro: #{lighten(#455a64, 50%)};
-  --color-mas-claro: #{lighten(#455a64, 60%)};
-  --color-oscuro: #{darken(#455a64, 15%)};
-  --bk1: 700px;
+  --navy: #14213D;
+  --blue: #2C5AA0;
+  --blue-light: #E8EEF6;
+  --slate: #5B6B7C;
+  --paper: #F6F8FA;
+  --border: #D7DEE7;
 }
 
-* {
-  box-sizing: border-box;
+.tab1-content {
+  --background: var(--paper);
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
-.contenedor {
-  max-width: 1170px;
-  margin: 0 auto 1rem;
-  padding: 1.5rem;
-  font-family: 'Roboto', sans-serif;
-  color: var(--color-principal);
-  line-height: 1.5;
-}
+.banner {
+  background: var(--navy);
+  color: #fff;
+  padding: 2.5rem 1.5rem 3.5rem;
+  text-align: left;
 
-.wrapper {
-  box-shadow: 0 0 20px 0 rgba(69, 90, 100, 0.7);
-  border-radius: 5px;
+  h1 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    margin: 0 0 0.5rem;
 
-  @media screen and (min-width: 700px) {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    span {
+      color: var(--blue-light);
+      font-weight: 600;
+    }
   }
-}
 
-.servicios {
-  list-style: none;
-  text-align: center;
-
-  @media screen and (min-width: 700px) {
-    text-align: left;
+  p {
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 480px;
+    margin: 0 0 1.5rem;
+    font-size: 0.92rem;
   }
-}
 
-.logo {
-  text-align: center;
-  margin-bottom: 1rem;
-}
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
 
-.info-empresa {
-  padding: 1rem;
-  background-color: var(--color-claro);
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.9);
 
-  h3 {
-    text-align: center;
-
-    @media screen and (min-width: 700px) {
-      text-align: left;
-      margin-bottom: 0.5rem;
+      ion-icon {
+        font-size: 0.9rem;
+      }
     }
   }
 }
 
-.nombre-empresa {
-  color: var(--color-oscuro);
+.card-form {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  max-width: 640px;
+  margin: -2rem auto 2rem;
+  padding: 2rem 1.75rem;
+  position: relative;
+  z-index: 1;
 }
 
-.contacto {
-  padding: 1rem;
-  background-color: var(--color-mas-claro);
+.seccion {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 1rem;
+  margin: 0 0 1rem;
 
-  h3 {
-    margin-bottom: 1rem;
+  &:not(:first-child) {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
   }
 }
 
-.formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 1.25rem;
+.campo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+
+  > ion-icon {
+    font-size: 1.15rem;
+    color: var(--blue);
+    margin-top: 1.9rem;
+    flex-shrink: 0;
+  }
+
+  .campo-input {
+    flex: 1;
+    min-width: 0;
+  }
 
   label {
     display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--slate);
+    margin-bottom: 0.3rem;
+
+    .opcional {
+      font-weight: 400;
+      opacity: 0.7;
+    }
   }
 
-  button,
   input,
   textarea {
     width: 100%;
-    padding: 1rem;
-    border: 1px solid var(--color-claro);
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
     font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--navy);
+
+    &:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
   }
 
   textarea {
@@ -95,28 +139,53 @@
   }
 }
 
-.full {
-  grid-column: 1 / 3;
+.fila-doble {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+
+  @media screen and (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+  }
 }
 
 .boton-enviar {
-  background-color: var(--color-claro);
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  background: var(--blue);
+  color: #fff;
   border: none;
-  border-radius: 5px;
-  text-transform: uppercase;
-  font-weight: bold;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.92rem;
   cursor: pointer;
 
-  &:focus,
-  &:hover {
-    background-color: var(--color-principal);
-    color: #fff;
+  &:hover,
+  &:focus {
+    background: var(--navy);
     outline: 0;
-    transition: background-color 0.3s ease-out;
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+.banner-offline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  padding: 0.65rem 1.1rem;
+  background: #FDECEA;
+  color: #B3261E;
+  border-bottom: 1px solid #F5C6C2;
+
+  ion-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
   }
 }

@@ -6,8 +6,13 @@ import {
   IonModal, IonButtons, IonButton
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { close, checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
+import {
+  close, checkmarkCircleOutline, alertCircleOutline,
+  personOutline, businessOutline, mailOutline, callOutline, chatbubbleOutline,
+  locationOutline, cloudOfflineOutline
+} from 'ionicons/icons';
 import { ContactoService, Contacto } from '../services/contacto.service';
+import { ConectividadService } from '../services/conectividad.service';
 
 @Component({
   selector: 'app-tab1',
@@ -33,13 +38,20 @@ export class Tab1Page implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private contactoService: ContactoService
+    private contactoService: ContactoService,
+    public conectividad: ConectividadService // público para leerlo desde el HTML (banner)
   ) {
-    // Registramos los íconos que usa el HTML (close, check, alert)
     addIcons({
       'close': close,
       'checkmark-circle-outline': checkmarkCircleOutline,
-      'alert-circle-outline': alertCircleOutline
+      'alert-circle-outline': alertCircleOutline,
+      'person-outline': personOutline,
+      'business-outline': businessOutline,
+      'mail-outline': mailOutline,
+      'call-outline': callOutline,
+      'chatbubble-outline': chatbubbleOutline,
+      'location-outline': locationOutline,
+      'cloud-offline-outline': cloudOfflineOutline
     });
   }
 
@@ -59,6 +71,13 @@ export class Tab1Page implements OnInit {
       const camposInvalidos = Object.keys(this.contactoForm.controls)
         .filter(campo => this.contactoForm.get(campo)?.invalid);
       this.mensajeError = `Revisa estos campos: ${camposInvalidos.join(', ')}.`;
+      this.modalErrorAbierto = true;
+      return;
+    }
+
+    const hayConexion = await this.conectividad.estaConectado();
+    if (!hayConexion) {
+      this.mensajeError = 'No tienes conexión a internet. Conéctate e intenta enviar de nuevo.';
       this.modalErrorAbierto = true;
       return;
     }

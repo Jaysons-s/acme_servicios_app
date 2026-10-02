@@ -4,52 +4,76 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="tab1-content">
 
-  <div class="contenedor">
-    <h1 class="logo"><span class="nombre-empresa">Acme</span> Servicios</h1>
-    <div class="wrapper animated bounceInLeft">
-      <div class="info-empresa">
-        <h3>Acme Servicios</h3>
-        <ul class="servicios">
-          <li><i class="fa fa-map-marker"></i> Calle Cualquiera, 44. 88880. Ciudad (Provincia)</li>
-          <li><i class="fa fa-mobile"></i> 555 555 000</li>
-          <li><i class="fa fa-envelope"></i> info&#64;empresa.com</li>
-        </ul>
-      </div>
-      <div class="contacto">
-        <h3>Enviar Correo</h3>
-
-        <form class="formulario" [formGroup]="contactoForm" (ngSubmit)="onSubmit()">
-          <p>
-            <label>Nombre</label>
-            <input type="text" formControlName="nombre" required>
-          </p>
-          <p>
-            <label>Empresa</label>
-            <input type="text" formControlName="empresa">
-          </p>
-          <p>
-            <label>Correo</label>
-            <input type="email" formControlName="email" required>
-          </p>
-          <p>
-            <label>Teléfono</label>
-            <input type="text" formControlName="telefono" required>
-          </p>
-          <p class="full">
-            <label>Mensaje</label>
-            <textarea formControlName="mensaje" required></textarea>
-          </p>
-          <p class="full">
-            <button class="boton-enviar" type="submit" [disabled]="enviando">
-              {{ enviando ? 'Enviando...' : 'Enviar' }}
-            </button>
-          </p>
-        </form>
-
-      </div>
+<div class="banner-offline" *ngIf="!conectividad.conectado()">
+  <ion-icon name="cloud-offline-outline"></ion-icon>
+  Sin conexión — no podrás enviar el formulario hasta reconectarte
+</div>
+  
+  <div class="banner">
+    <h1>Acme <span>Servicios</span></h1>
+    <p>Cuéntanos qué necesitas y un asesor te contactará en menos de 24 horas.</p>
+    <div class="chips">
+      <span><ion-icon name="location-outline"></ion-icon> Calle Cualquiera, 44. Ciudad</span>
+      <span><ion-icon name="call-outline"></ion-icon> 555 555 000</span>
+      <span><ion-icon name="mail-outline"></ion-icon> info&#64;empresa.com</span>
     </div>
+  </div>
+
+  <div class="card-form">
+    <form class="formulario" [formGroup]="contactoForm" (ngSubmit)="onSubmit()">
+
+      <p class="seccion">Tus datos</p>
+
+      <div class="campo">
+        <ion-icon name="person-outline"></ion-icon>
+        <div class="campo-input">
+          <label>Nombre</label>
+          <input type="text" formControlName="nombre" placeholder="Tu nombre completo">
+        </div>
+      </div>
+
+      <div class="campo">
+        <ion-icon name="business-outline"></ion-icon>
+        <div class="campo-input">
+          <label>Empresa <span class="opcional">(opcional)</span></label>
+          <input type="text" formControlName="empresa" placeholder="Nombre de tu empresa">
+        </div>
+      </div>
+
+      <div class="fila-doble">
+        <div class="campo">
+          <ion-icon name="mail-outline"></ion-icon>
+          <div class="campo-input">
+            <label>Correo</label>
+            <input type="email" formControlName="email" placeholder="tu@correo.com">
+          </div>
+        </div>
+
+        <div class="campo">
+          <ion-icon name="call-outline"></ion-icon>
+          <div class="campo-input">
+            <label>Teléfono</label>
+            <input type="text" formControlName="telefono" placeholder="55 5555 5555">
+          </div>
+        </div>
+      </div>
+
+      <p class="seccion">Tu mensaje</p>
+
+      <div class="campo">
+        <ion-icon name="chatbubble-outline"></ion-icon>
+        <div class="campo-input">
+          <label>¿En qué te ayudamos?</label>
+          <textarea formControlName="mensaje" rows="4" placeholder="Escribe tu mensaje aquí..."></textarea>
+        </div>
+      </div>
+
+      <button class="boton-enviar" type="submit" [disabled]="enviando">
+        {{ enviando ? 'Enviando...' : 'Enviar mensaje' }}
+      </button>
+    </form>
   </div>
 
   <!-- Modal de ÉXITO -->

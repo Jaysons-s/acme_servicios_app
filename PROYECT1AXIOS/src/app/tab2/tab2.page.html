@@ -4,17 +4,28 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="tab2-content">
 
   <ion-refresher slot="fixed" (ionRefresh)="cargarContactos($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Contactos Recibidos</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- Banner de sin conexión (se basa en ConectividadService, en tiempo real) -->
+  <div class="banner-offline" *ngIf="!conectividad.conectado()">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    Sin conexión a internet
+  </div>
+
+  <!-- Aviso de que lo que se ve es caché, no datos frescos -->
+  <div class="banner-cache" *ngIf="mostrandoCache">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    Mostrando datos guardados (sin conexión al servidor). Puede que no estén actualizados.
+  </div>
+
+  <div class="encabezado">
+    <h1>Contactos recibidos</h1>
+    <p *ngIf="!cargando && !error">{{ contactos.length }} contacto(s) en total</p>
+  </div>
 
   <!-- Estado: cargando -->
   <div class="estado" *ngIf="cargando">
@@ -22,10 +33,10 @@
     <p>Cargando contactos...</p>
   </div>
 
-  <!-- Estado: error -->
+  <!-- Estado: error real (ni servidor ni caché disponibles) -->
   <div class="estado error" *ngIf="!cargando && error">
     <p>{{ error }}</p>
-    <p class="ayuda">Verifica que tu API PHP esté corriendo (XAMPP: Apache + MySQL en verde).</p>
+    <p class="ayuda">Verifica tu conexión, o que tu API PHP esté corriendo (XAMPP: Apache + MySQL en verde).</p>
   </div>
 
   <!-- Estado: vacío -->
@@ -34,16 +45,29 @@
     <p class="ayuda">Ve al formulario del Tab1 y envía uno de prueba.</p>
   </div>
 
-  <!-- Lista de contactos -->
-  <ion-list *ngIf="!cargando && !error && contactos.length > 0">
-    <ion-item *ngFor="let c of contactos">
-      <ion-label>
-        <h2>{{ c.nombre }} <span *ngIf="c.empresa"> — {{ c.empresa }}</span></h2>
-        <p>{{ c.email }} · {{ c.telefono }}</p>
-        <p class="mensaje">{{ c.mensaje }}</p>
-      </ion-label>
-      <ion-note slot="end">{{ c.created_at }}</ion-note>
-    </ion-item>
-  </ion-list>
+  <!-- Tarjetas de contacto -->
+  <div class="grid-contactos" *ngIf="!cargando && !error && contactos.length > 0">
+    <div class="tarjeta" *ngFor="let c of contactos">
+      <div class="tarjeta-header">
+        <div class="avatar">{{ iniciales(c.nombre) }}</div>
+        <div class="nombre-bloque">
+          <h2>{{ c.nombre }}</h2>
+          <p class="empresa" *ngIf="c.empresa">
+            <ion-icon name="business-outline"></ion-icon> {{ c.empresa }}
+          </p>
+        </div>
+      </div>
+
+      <p class="mensaje">"{{ c.mensaje }}"</p>
+
+      <div class="tarjeta-footer">
+        <span><ion-icon name="mail-outline"></ion-icon> {{ c.email }}</span>
+        <span><ion-icon name="call-outline"></ion-icon> {{ c.telefono }}</span>
+      </div>
+      <div class="fecha">
+        <ion-icon name="time-outline"></ion-icon> {{ c.created_at }}
+      </div>
+    </div>
+  </div>
 
 </ion-content>
