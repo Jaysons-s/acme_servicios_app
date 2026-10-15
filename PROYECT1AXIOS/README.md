@@ -45,9 +45,11 @@ Script completo en [`api/schema.sql`](./api/schema.sql).
 1. Levantar Apache y MySQL en XAMPP.
 2. Importar `api/schema.sql` en phpMyAdmin.
 3. Copiar la carpeta `api/` dentro de `C:\xampp\htdocs\api`.
-4. Ajustar `API_URL` en `src/app/services/contacto.service.ts` si es necesario.
-5. Instalar dependencias del proyecto Ionic: `npm install`
-6. Correr la app: `ionic serve`
+4. Configurar la IP de la computadora donde corre XAMPP en `apiBaseUrl`, tanto en `src/environments/environment.ts` como en `src/environments/environment.prod.ts` (actualmente `http://192.168.1.146`). Si la IP cambia, actualizarla en ambos archivos.
+5. Para usar la app en un teléfono, conectarlo a la misma red Wi-Fi y permitir conexiones entrantes al puerto 80 de Apache en el firewall de Windows. La app llama a esa IP directamente y no depende de que `ionic serve` esté encendido.
+6. Mantener Apache y MySQL de XAMPP encendidos: `ionic serve` solo sirve la interfaz y no las APIs PHP. Contactos usa `/api`; el login requiere `/miapi/login.php` en el mismo servidor. Copiar también `api/estadisticas.php` a `C:\xampp\htdocs\api\estadisticas.php` para que funcione la pantalla de estadísticas.
+7. Instalar dependencias del proyecto Ionic: `npm install`
+8. Correr la app web: `ionic serve`. Para la app Android instalada, ejecutar `npm run build` y `npx cap sync android`, luego volver a compilar e instalar Android; el teléfono debe estar en la misma Wi-Fi que la PC.
 
 ## Evidencia de prompts usados con IA
 

@@ -1,0 +1,96 @@
+:host {
+  --navy: #14213D;
+  --blue: #2C5AA0;
+  --slate: #5B6B7C;
+  --paper: #F6F8FA;
+  --border: #D7DEE7;
+}
+
+.origen-content {
+  --background: var(--paper);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.contenedor {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem;
+
+  h1 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin: 0 0 0.4rem;
+  }
+
+  .intro {
+    color: var(--slate);
+    font-size: 0.85rem;
+    margin: 0 0 1.25rem;
+  }
+}
+
+.card-form {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--slate);
+    margin: 1rem 0 0.3rem;
+
+    &:first-child { margin-top: 0; }
+  }
+
+  input {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: var(--navy);
+
+    &:focus { outline: none; border-color: var(--blue); }
+  }
+
+  .url-actual {
+    font-size: 0.8rem;
+    color: var(--slate);
+    margin: 1rem 0 0;
+    word-break: break-all;
+  }
+
+  .boton {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &.secundario {
+      background: #fff;
+      color: var(--blue);
+      border: 1px solid var(--blue);
+    }
+
+    &:disabled { opacity: 0.6; }
+  }
+
+  .msg {
+    font-size: 0.85rem;
+    margin: 1rem 0 0;
+    &.ok { color: #1B7F3B; }
+    &.mal { color: #B3261E; }
+  }
+}

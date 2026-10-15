@@ -1,0 +1,67 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Gráficas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="graficas-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="cargar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="encabezado">
+    <h1>Resumen de contactos</h1>
+    <p>Datos de la tabla <strong>contactos</strong>. Toca una barra o una porción para ver el detalle.</p>
+  </div>
+
+  <!-- Aviso: los datos son del caché, no del servidor -->
+  <div class="aviso" *ngIf="desdeCache && !cargando">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    Mostrando datos guardados (sin conexión al servidor). Pueden no estar actualizados.
+  </div>
+
+  <div class="estado" *ngIf="cargando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <div class="estado error" *ngIf="!cargando && error">
+    <p>{{ error }}</p>
+    <p class="ayuda">Revisa la IP en el tab Origen y que Apache esté encendido.</p>
+  </div>
+
+  <div class="estado" *ngIf="!cargando && !error && contactos.length === 0">
+    <p>Todavía no hay contactos para graficar.</p>
+    <p class="ayuda">Envía algunos desde el formulario o importa el script de datos de prueba.</p>
+  </div>
+
+  <!-- Los contenedores de las gráficas siempre están en el DOM; solo se ocultan mientras no hay datos -->
+  <div class="contenido" [hidden]="cargando || !!error || contactos.length === 0">
+
+    <div class="kpis">
+      <div class="kpi"><span class="num">{{ kpis.total }}</span><span class="etq">Contactos</span></div>
+      <div class="kpi"><span class="num">{{ kpis.empresas }}</span><span class="etq">Empresas</span></div>
+      <div class="kpi"><span class="num">{{ kpis.ultimos7 }}</span><span class="etq">Últimos 7 días</span></div>
+    </div>
+
+    <section class="card">
+      <h2>Contactos por día</h2>
+      <p class="desc">¿Cuántos mensajes llegaron cada día?</p>
+      <div #chartDias class="chart"></div>
+    </section>
+
+    <section class="card">
+      <h2>Contactos por empresa</h2>
+      <p class="desc">Empresas que más han escrito (máximo 8).</p>
+      <div #chartEmpresas class="chart"></div>
+    </section>
+
+    <section class="card">
+      <h2>Con empresa vs. sin empresa</h2>
+      <p class="desc">Proporción de contactos que indicaron su empresa.</p>
+      <div #chartDona class="chart"></div>
+    </section>
+
+  </div>
+</ion-content>

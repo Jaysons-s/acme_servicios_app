@@ -21,6 +21,12 @@
       <p class="subtitulo">Ingresa tus credenciales para acceder al panel.</p>
 
       <form (submit)="handleLogin($event)">
+        <label for="ip">IP del servidor (tu laptop) y puerto</label>
+        <div class="fila-ip">
+          <input id="ip" type="text" name="ip" [(ngModel)]="ip" placeholder="192.168.0.173" inputmode="decimal" autocomplete="off">
+          <input id="puerto" type="text" name="puerto" [(ngModel)]="puerto" placeholder="80" class="puerto" inputmode="numeric" autocomplete="off">
+        </div>
+
         <label for="email">Correo</label>
         <input id="email" type="email" name="email" [(ngModel)]="email" required placeholder="tucorreo@acme.com">
 
@@ -29,10 +35,9 @@
 
         <p class="error" *ngIf="error">{{ error }}</p>
 
-        <button type="submit" class="boton-login">Entrar</button>
+        <button type="submit" class="boton-login" [disabled]="cargando">{{ cargando ? 'Conectando...' : 'Entrar' }}</button>
       </form>
     </div>
 
   </div>
 </ion-content>
-// pantallas donde se conectan las api, se consumen, objetos, interfaces

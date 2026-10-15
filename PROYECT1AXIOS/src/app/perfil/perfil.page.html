@@ -1,0 +1,46 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Mi perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="perfil-content">
+
+  <div class="contenedor">
+
+    <!-- Avatar: si hay foto la muestra, si no, muestra las iniciales -->
+    <div class="avatar-bloque">
+      <div class="avatar" (click)="tomarFoto()">
+        <img *ngIf="fotoBase64" [src]="fotoBase64" alt="Foto de perfil">
+        <span *ngIf="!fotoBase64" class="iniciales">
+          {{ iniciales() || '?' }}
+        </span>
+        <div class="boton-camara">
+          <ion-icon name="camera-outline"></ion-icon>
+        </div>
+      </div>
+      <p class="ayuda-foto">Toca la imagen para tomar o elegir una foto</p>
+    </div>
+
+    <!-- Formulario de datos -->
+    <div class="card-form">
+      <label>Nombre</label>
+      <input type="text" [(ngModel)]="nombre" name="nombre" placeholder="Tu nombre completo">
+
+      <label>Correo</label>
+      <input type="email" [(ngModel)]="email" name="email" placeholder="tu@correo.com">
+
+      <label>Teléfono</label>
+      <input type="text" [(ngModel)]="telefono" name="telefono" placeholder="55 5555 5555">
+
+      <button class="boton-guardar" (click)="guardarPerfil()">Guardar cambios</button>
+
+      <p class="mensaje-guardado" *ngIf="guardado">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Perfil guardado correctamente
+      </p>
+    </div>
+
+  </div>
+
+</ion-content>

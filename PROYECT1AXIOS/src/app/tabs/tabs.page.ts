@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { triangle, images, square } from 'ionicons/icons';
+import {
+  mailOutline, peopleOutline, documentTextOutline, personCircleOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
@@ -11,6 +13,11 @@ import { triangle, images, square } from 'ionicons/icons';
 })
 export class TabsPage {
   constructor() {
-    addIcons({ triangle, images, square });
+    addIcons({
+      'mail-outline': mailOutline,
+      'people-outline': peopleOutline,
+      'document-text-outline': documentTextOutline,
+      'person-circle-outline': personCircleOutline
+    });
   }
 }

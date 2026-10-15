@@ -1,47 +1,49 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Forms "template-driven" (con ngModel), distinto a ReactiveFormsModule
+import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular';
-import { Router } from '@angular/router'; // Servicio para navegar entre pantallas desde código
+import { Router } from '@angular/router';
 import axios from 'axios';
-import anime from 'animejs'; // Librería externa de animaciones (nada que ver con Angular/Ionic)
+import anime from 'animejs';
+import { OrigenDatosService } from '../services/origen-datos.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  // Solo estos 3 están disponibles en el HTML de esta pantalla.
-  // OJO: no está ReactiveFormsModule aquí, porque este login usa ngModel, no FormGroup.
   imports: [IonContent, CommonModule, FormsModule],
 })
 export class LoginPage implements OnInit {
-
-  // @ViewChild agarra una referencia directa a un elemento del HTML.
-  // Aquí apunta a un <path> de SVG que tenga #pathRef, para poder animarlo con JS.
   @ViewChild('pathRef') pathRef!: ElementRef<SVGPathElement>;
 
-  // Variables conectadas al HTML con [(ngModel)] — se actualizan solas
-  // cada vez que el usuario escribe en los inputs de email/password.
-  email: string = '';
-  password: string = '';
-  error: string = ''; // Aquí se guarda el mensaje de error para mostrarlo en pantalla
+  email = '';
+  password = '';
+  ip = '';          // IP de la laptop (se guarda en el dispositivo)
+  puerto = '80';
+  error = '';
+  cargando = false;
 
-  // Guarda la animación actual, para poder pausarla si se dispara otra antes de que termine.
   private currentAnim: anime.AnimeInstance | null = null;
 
-  // URL de la API de LOGIN — OJO: es una API distinta a la de contactos (api/index.php).
-  // Esta debe existir en C:\xampp\htdocs\miapi\login.php para que el login funcione.
-  private API_URL = 'http://localhost/miapi/login.php';
+  constructor(
+    private router: Router,
+    private origenDatos: OrigenDatosService,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  // Router se inyecta en el constructor para poder usarlo después con this.router
-  constructor(private router: Router) {}
+  // Al abrir la app, recupera la IP guardada la última vez (no hay que volver a escribirla)
+  async ngOnInit() {
+    const config = await this.origenDatos.obtenerConfig();
+    this.ip = config.ip;
+    this.puerto = config.puerto;
+    this.cdr.detectChanges();
+  }
 
-  ngOnInit() {}
-
-  // Anima el trazo de un SVG (efecto visual, no afecta la lógica del login)
   animatePath(offset: number, dasharray: string) {
-    if (this.currentAnim) this.currentAnim.pause(); // evita que se encimen animaciones
+    if (!this.pathRef) return;
+    if (this.currentAnim) this.currentAnim.pause();
     this.currentAnim = anime({
       targets: this.pathRef.nativeElement,
       strokeDashoffset: { value: offset, duration: 700, easing: 'easeOutQuart' },
@@ -49,30 +51,58 @@ export class LoginPage implements OnInit {
     });
   }
 
-  // Se ejecuta cuando el usuario da submit al formulario de login
+  // Muestra un mensaje y fuerza a Angular a repintar (Axios corre fuera de la zona de Angular)
+  private mostrarError(mensaje: string) {
+    this.zone.run(() => {
+      this.error = mensaje;
+      this.cargando = false;
+      this.cdr.detectChanges();
+    });
+  }
+
   async handleLogin(e: Event) {
-    e.preventDefault(); // evita que el navegador recargue la página (comportamiento normal de un <form>)
+    e.preventDefault();
     this.error = '';
-    this.animatePath(-730, '530 1386'); // dispara la animación decorativa
+
+    if (!this.email.trim() || !this.password) {
+      this.mostrarError('Escribe tu correo y contraseña.');
+      return;
+    }
+
+    this.cargando = true;
+    try { this.animatePath(-730, '530 1386'); } catch { /* la animación no es crítica */ }
 
     try {
-      // Manda email y password a la API de login por POST
-      const response = await axios.post(this.API_URL, {
-        email: this.email,
-        password: this.password,
-      });
+      // 1) Guarda la IP/puerto en el dispositivo (JSON) para toda la app
+      const config = await this.origenDatos.guardarConfig(this.ip, this.puerto);
+      this.ip = config.ip;
+      this.puerto = config.puerto;
 
-      // Si la API responde success:true, entramos a la app.
-      // navigateByUrl cambia de pantalla SIN recargar el navegador (navegación de SPA).
-      if (response.data.success) {
-        this.router.navigateByUrl('/tabs/tab1');
+      // 2) Llama a la API de login en esa IP
+      const base = await this.origenDatos.obtenerUrlBase();
+      const response = await axios.post(
+        `${base}/miapi/login.php`,
+        { email: this.email, password: this.password },
+        { timeout: 8000 }
+      );
+
+      if (response.data?.success) {
+        this.zone.run(() => {
+          this.cargando = false;
+          this.router.navigateByUrl('/tabs/tab1');
+        });
       } else {
-        this.error = 'Usuario o contraseña incorrectos';
+        this.mostrarError(response.data?.message || 'Usuario o contraseña incorrectos');
       }
-    } catch (err) {
-      // Si la petición ni siquiera llegó a buen puerto (servidor caído, CORS, etc.)
-      console.error(err);
-      this.error = 'No se pudo conectar con el servidor';
+    } catch (err: any) {
+      console.error('Error de login:', err);
+      if (err?.code === 'ECONNABORTED') {
+        this.mostrarError(`El servidor (${this.ip || 'localhost'}) tardó demasiado. Revisa la IP y que Apache esté encendido.`);
+      } else if (err?.response) {
+        this.mostrarError(`El servidor respondió con error ${err.response.status}.`);
+      } else {
+        this.mostrarError(`No se pudo conectar a ${this.ip || 'localhost'}:${this.puerto}. Revisa la IP y que estés en la misma red WiFi.`);
+      }
     }
   }
 }

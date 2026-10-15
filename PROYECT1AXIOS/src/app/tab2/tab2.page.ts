@@ -1,13 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonSpinner, IonRefresher, IonRefresherContent, IonIcon
+  IonSpinner, IonRefresher, IonRefresherContent, IonIcon,
+  IonModal, IonButtons, IonButton
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { mailOutline, callOutline, businessOutline, timeOutline, cloudOfflineOutline } from 'ionicons/icons';
+import {
+  mailOutline, callOutline, businessOutline, timeOutline, cloudOfflineOutline,
+  createOutline, trashOutline
+} from 'ionicons/icons';
 import { ContactoService, Contacto } from '../services/contacto.service';
 import { ConectividadService } from '../services/conectividad.service';
+import { UiService } from '../services/ui.service';
+import { calcularCambios } from './cambios.util';
 
 @Component({
   selector: 'app-tab2',
@@ -16,8 +23,10 @@ import { ConectividadService } from '../services/conectividad.service';
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonSpinner, IonRefresher, IonRefresherContent, IonIcon
+    IonSpinner, IonRefresher, IonRefresherContent, IonIcon,
+    IonModal, IonButtons, IonButton
   ],
 })
 export class Tab2Page implements OnInit {
@@ -25,11 +34,19 @@ export class Tab2Page implements OnInit {
   contactos: Contacto[] = [];
   cargando = true;
   error = '';
-  mostrandoCache = false; // true cuando los datos en pantalla vienen del caché, no del servidor
+  mostrandoCache = false; // true cuando lo que se ve viene del caché, no del servidor
+
+  // Edición (PATCH)
+  editForm: FormGroup;
+  contactoEditando: Contacto | null = null;
+  modalEditarAbierto = false;
+  errorEdicion = '';
 
   constructor(
     private contactoService: ContactoService,
-    public conectividad: ConectividadService, // público para poder leerlo directo desde el HTML
+    public conectividad: ConectividadService,
+    private ui: UiService,
+    private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
     addIcons({
@@ -37,7 +54,17 @@ export class Tab2Page implements OnInit {
       'call-outline': callOutline,
       'business-outline': businessOutline,
       'time-outline': timeOutline,
-      'cloud-offline-outline': cloudOfflineOutline
+      'cloud-offline-outline': cloudOfflineOutline,
+      'create-outline': createOutline,
+      'trash-outline': trashOutline
+    });
+
+    this.editForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      empresa: [''],
+      email: ['', [Validators.required, Validators.email]],
+      telefono: ['', [Validators.required, Validators.minLength(7)]],
+      mensaje: ['', [Validators.required, Validators.minLength(3)]],
     });
   }
 
@@ -45,6 +72,12 @@ export class Tab2Page implements OnInit {
     this.cargarContactos();
   }
 
+  // Solo se puede editar/eliminar con datos reales del servidor y con conexión
+  get puedeModificar(): boolean {
+    return !this.mostrandoCache && this.conectividad.conectado();
+  }
+
+  // ---------------- GET: listar (el spinner de la página es su "loading") ----------------
   async cargarContactos(event?: any) {
     this.error = '';
     this.cargando = true;
@@ -55,7 +88,6 @@ export class Tab2Page implements OnInit {
       this.contactos = resultado.contactos;
       this.mostrandoCache = resultado.desdeCache;
     } catch (err: any) {
-      // Esto solo pasa si falló Y no había absolutamente nada en caché
       this.error = err?.message || 'No se pudieron cargar los contactos.';
     } finally {
       this.cargando = false;
@@ -63,6 +95,89 @@ export class Tab2Page implements OnInit {
       if (event) {
         event.target.complete();
       }
+    }
+  }
+
+  // Vuelve a pedir la lista después de un cambio, para mostrar lo que de verdad hay en el servidor.
+  // Si justo en ese momento el servidor no responde, aplica el cambio de forma local.
+  private async refrescarLista(ajusteLocal: (lista: Contacto[]) => Contacto[]) {
+    const resultado = await this.contactoService.obtenerContactos();
+    this.contactos = resultado.desdeCache ? ajusteLocal(resultado.contactos) : resultado.contactos;
+    this.mostrandoCache = resultado.desdeCache;
+    this.cdr.detectChanges();
+  }
+
+  // ---------------- PATCH: editar ----------------
+  abrirEditar(contacto: Contacto) {
+    this.contactoEditando = contacto;
+    this.editForm.reset({
+      nombre: contacto.nombre,
+      empresa: contacto.empresa ?? '',
+      email: contacto.email,
+      telefono: contacto.telefono,
+      mensaje: contacto.mensaje
+    });
+    this.errorEdicion = '';
+    this.modalEditarAbierto = true;
+  }
+
+  cerrarModalEditar() {
+    this.modalEditarAbierto = false;
+  }
+
+  async guardarEdicion() {
+    const original = this.contactoEditando;
+    if (!original || original.id === undefined) return;
+
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      const malos = Object.keys(this.editForm.controls).filter(c => this.editForm.get(c)?.invalid);
+      this.errorEdicion = `Revisa estos campos: ${malos.join(', ')}.`;
+      return;
+    }
+
+    // Solo viajan los campos que cambiaron
+    const cambios = calcularCambios(original, this.editForm.value);
+    if (Object.keys(cambios).length === 0) {
+      this.errorEdicion = 'No hiciste ningún cambio.';
+      return;
+    }
+
+    this.errorEdicion = '';
+    const id = original.id;
+    try {
+      await this.ui.conCarga('Guardando cambios...', async () => {
+        await this.contactoService.actualizarContactoParcial(id, cambios);
+        await this.refrescarLista(lista => lista.map(c => (c.id === id ? { ...c, ...cambios } : c)));
+      });
+      this.cerrarModalEditar();
+      await this.ui.toast('Contacto actualizado');
+    } catch (err: any) {
+      // El error se muestra dentro del modal, para que el usuario pueda corregir y reintentar
+      this.errorEdicion = err?.message || 'No se pudo guardar el cambio.';
+      this.cdr.detectChanges();
+    }
+  }
+
+  // ---------------- DELETE: eliminar ----------------
+  async eliminar(contacto: Contacto) {
+    if (contacto.id === undefined) return;
+    const id = contacto.id;
+
+    const confirmado = await this.ui.confirmar(
+      'Eliminar contacto',
+      `¿Seguro que quieres eliminar a ${contacto.nombre}? Esta acción no se puede deshacer.`
+    );
+    if (!confirmado) return;
+
+    try {
+      await this.ui.conCarga('Eliminando...', async () => {
+        await this.contactoService.eliminarContacto(id);
+        await this.refrescarLista(lista => lista.filter(c => c.id !== id));
+      });
+      await this.ui.toast('Contacto eliminado');
+    } catch (err: any) {
+      await this.ui.toast(err?.message || 'No se pudo eliminar el contacto.', 'error');
     }
   }
 

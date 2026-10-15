@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Preferences } from '@capacitor/preferences';
+import { OrigenDatosService } from './origen-datos.service';
 
-// URL base de la API en PHP.
-const API_URL = 'http://localhost/api';
-
-const CACHE_KEY = 'contactos_cache'; // clave donde guardamos la última lista buena que llegó
+const CACHE_KEY = 'contactos_cache';
 
 export interface Contacto {
   id?: number;
@@ -34,16 +32,12 @@ export interface ResultadoContactos {
 })
 export class ContactoService {
 
-  private http: AxiosInstance;
+  constructor(private origenDatos: OrigenDatosService) {}
 
-  constructor() {
-    this.http = axios.create({
-      baseURL: API_URL,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      timeout: 8000
-    });
+  // La URL se arma en cada llamada con la IP/puerto guardados (Origen de datos)
+  private async url(ruta: string): Promise<string> {
+    const base = await this.origenDatos.obtenerUrlBase();
+    return `${base}/api${ruta}`;
   }
 
   private extraerMensajeError(error: AxiosError<ApiResponse>): string {
@@ -51,85 +45,78 @@ export class ContactoService {
       return error.response.data.message;
     }
     if (error.request) {
-      return 'No se pudo conectar con el servidor. Verifica tu conexión.';
+      return 'No se pudo conectar con el servidor. Verifica tu conexión o la IP en Origen de datos.';
     }
     return 'Ocurrió un error inesperado.';
   }
 
-  // ---------- CACHÉ ----------
-  // Guarda la última lista de contactos que sí llegó bien, para poder
-  // mostrarla después aunque no haya conexión.
   private async guardarCache(contactos: Contacto[]): Promise<void> {
     await Preferences.set({ key: CACHE_KEY, value: JSON.stringify(contactos) });
   }
 
-  // Lee lo que haya guardado en caché (arreglo vacío si nunca se guardó nada)
   private async leerCache(): Promise<Contacto[]> {
     const { value } = await Preferences.get({ key: CACHE_KEY });
     return value ? JSON.parse(value) : [];
   }
 
-  // ---------- CRUD ----------
-
-  // READ (listar todos) → GET /index.php
-  // Ahora con estrategia de caché: si la API responde bien, actualiza el caché.
-  // Si la API falla (sin conexión, servidor caído), regresa lo último guardado.
+  // GET lista (con caché)
   async obtenerContactos(): Promise<ResultadoContactos> {
     try {
-      const { data } = await this.http.get<ApiResponse<Contacto[]>>('/index.php');
-      await this.guardarCache(data.data); // guarda copia fresca para la próxima vez que falle
+      const { data } = await axios.get<ApiResponse<Contacto[]>>(await this.url('/index.php'), { timeout: 8000 });
+      await this.guardarCache(data.data);
       return { contactos: data.data, desdeCache: false };
     } catch (error) {
-      // Si falla la petición real, intenta rescatar lo que haya en caché
       const cache = await this.leerCache();
       if (cache.length > 0) {
         return { contactos: cache, desdeCache: true };
       }
-      // Si ni siquiera hay caché (primera vez que se usa la app sin conexión), sí se lanza el error
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }
   }
 
   async obtenerContacto(id: number): Promise<Contacto> {
     try {
-      const { data } = await this.http.get<ApiResponse<Contacto>>(`/index.php?id=${id}`);
+      const { data } = await axios.get<ApiResponse<Contacto>>(await this.url(`/index.php?id=${id}`), { timeout: 8000 });
       return data.data;
     } catch (error) {
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }
   }
 
-  // CREATE → POST /index.php
+  // POST crear
   async crearContacto(contacto: Contacto): Promise<Contacto> {
     try {
-      const { data } = await this.http.post<ApiResponse<Contacto>>('/index.php', contacto);
+      const { data } = await axios.post<ApiResponse<Contacto>>(await this.url('/index.php'), contacto, { timeout: 8000 });
       return data.data;
     } catch (error) {
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }
   }
 
+  // PUT actualizar completo
   async actualizarContacto(id: number, contacto: Contacto): Promise<Contacto> {
     try {
-      const { data } = await this.http.put<ApiResponse<Contacto>>(`/index.php?id=${id}`, contacto);
+      const { data } = await axios.put<ApiResponse<Contacto>>(await this.url(`/index.php?id=${id}`), contacto, { timeout: 8000 });
       return data.data;
     } catch (error) {
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }
   }
 
+  // PATCH actualizar parcial
   async actualizarContactoParcial(id: number, cambios: Partial<Contacto>): Promise<Contacto> {
     try {
-      const { data } = await this.http.patch<ApiResponse<Contacto>>(`/index.php?id=${id}`, cambios);
+      const { data } = await axios.patch<ApiResponse<Contacto>>(await this.url(`/index.php?id=${id}`), cambios, { timeout: 8000 });
       return data.data;
     } catch (error) {
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }
   }
 
+  // DELETE eliminar
   async eliminarContacto(id: number): Promise<void> {
     try {
-      await this.http.delete<ApiResponse<null>>(`/index.php?id=${id}`);
+      await axios.delete<ApiResponse<null>>(await this.url(`/index.php?id=${id}`), { timeout: 8000 });
     } catch (error) {
       throw new Error(this.extraerMensajeError(error as AxiosError<ApiResponse>));
     }

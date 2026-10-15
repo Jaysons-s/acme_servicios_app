@@ -13,6 +13,7 @@ import {
 } from 'ionicons/icons';
 import { ContactoService, Contacto } from '../services/contacto.service';
 import { ConectividadService } from '../services/conectividad.service';
+import { UiService } from '../services/ui.service';
 
 @Component({
   selector: 'app-tab1',
@@ -39,7 +40,8 @@ export class Tab1Page implements OnInit {
   constructor(
     private fb: FormBuilder,
     private contactoService: ContactoService,
-    public conectividad: ConectividadService // público para leerlo desde el HTML (banner)
+    public conectividad: ConectividadService, // público para leerlo desde el HTML (banner)
+    private ui: UiService
   ) {
     addIcons({
       'close': close,
@@ -75,6 +77,10 @@ export class Tab1Page implements OnInit {
       return;
     }
 
+    // Verificación explícita de conectividad ANTES de intentar mandar nada.
+    // Un formulario de "crear" no se puede guardar en caché para mandarlo después
+    // (eso sería una mejora futura con una cola de sincronización), así que aquí
+    // avisamos de inmediato en vez de dejar que truene el try/catch de abajo.
     const hayConexion = await this.conectividad.estaConectado();
     if (!hayConexion) {
       this.mensajeError = 'No tienes conexión a internet. Conéctate e intenta enviar de nuevo.';
@@ -87,7 +93,10 @@ export class Tab1Page implements OnInit {
     const nuevoContacto: Contacto = this.contactoForm.value;
 
     try {
-      const creado = await this.contactoService.crearContacto(nuevoContacto);
+      // POST con el "Loading" de Ionic visible mientras se espera la respuesta
+      const creado = await this.ui.conCarga('Enviando mensaje...', () =>
+        this.contactoService.crearContacto(nuevoContacto)
+      );
 
       this.mensajeExito = `¡Gracias ${creado.nombre}! Tu mensaje fue enviado correctamente.`;
       this.modalExitoAbierto = true;

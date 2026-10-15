@@ -1,0 +1,33 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Origen de datos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="origen-content">
+  <div class="contenedor">
+    <h1>Servidor de datos</h1>
+    <p class="intro">
+      IP de la computadora donde corren las APIs (XAMPP). La app usa esta dirección
+      para el login, los contactos y todo lo demás. Se guarda en el dispositivo.
+    </p>
+
+    <div class="card-form">
+      <label>IP del servidor</label>
+      <input type="text" [(ngModel)]="ip" name="ip" placeholder="192.168.0.173" inputmode="decimal" autocomplete="off">
+
+      <label>Puerto</label>
+      <input type="text" [(ngModel)]="puerto" name="puerto" placeholder="80" inputmode="numeric" autocomplete="off">
+
+      <p class="url-actual">Dirección actual: <strong>{{ urlActual }}</strong></p>
+
+      <button class="boton" (click)="guardar()">Guardar</button>
+      <button class="boton secundario" (click)="probar()" [disabled]="probando">
+        {{ probando ? 'Probando...' : 'Guardar y probar conexión' }}
+      </button>
+
+      <p class="msg ok" *ngIf="guardado">Guardado</p>
+      <p class="msg" [class.ok]="pruebaOk" [class.mal]="!pruebaOk" *ngIf="resultadoPrueba">{{ resultadoPrueba }}</p>
+    </div>
+  </div>
+</ion-content>

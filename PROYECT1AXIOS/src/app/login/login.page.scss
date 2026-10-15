@@ -139,3 +139,17 @@
     }
   }
 }
+.panel-form .fila-ip {
+  display: flex;
+  gap: 0.5rem;
+
+  input.puerto {
+    width: 84px;
+    flex: none;
+  }
+}
+
+.panel-form .boton-login:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

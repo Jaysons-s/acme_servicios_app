@@ -6,11 +6,12 @@
 
 <ion-content [fullscreen]="true" class="tab1-content">
 
-<div class="banner-offline" *ngIf="!conectividad.conectado()">
-  <ion-icon name="cloud-offline-outline"></ion-icon>
-  Sin conexión — no podrás enviar el formulario hasta reconectarte
-</div>
-  
+  <div class="banner-offline" *ngIf="!conectividad.conectado()">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    Sin conexión — no podrás enviar el formulario hasta reconectarte
+  </div>
+
+
   <div class="banner">
     <h1>Acme <span>Servicios</span></h1>
     <p>Cuéntanos qué necesitas y un asesor te contactará en menos de 24 horas.</p>

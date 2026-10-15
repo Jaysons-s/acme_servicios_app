@@ -19,7 +19,7 @@
   <!-- Aviso de que lo que se ve es caché, no datos frescos -->
   <div class="banner-cache" *ngIf="mostrandoCache">
     <ion-icon name="cloud-offline-outline"></ion-icon>
-    Mostrando datos guardados (sin conexión al servidor). Puede que no estén actualizados.
+    Mostrando datos guardados (sin conexión al servidor). No se puede editar ni eliminar hasta reconectar.
   </div>
 
   <div class="encabezado">
@@ -27,7 +27,7 @@
     <p *ngIf="!cargando && !error">{{ contactos.length }} contacto(s) en total</p>
   </div>
 
-  <!-- Estado: cargando -->
+  <!-- Estado: cargando (GET) -->
   <div class="estado" *ngIf="cargando">
     <ion-spinner name="crescent"></ion-spinner>
     <p>Cargando contactos...</p>
@@ -36,7 +36,7 @@
   <!-- Estado: error real (ni servidor ni caché disponibles) -->
   <div class="estado error" *ngIf="!cargando && error">
     <p>{{ error }}</p>
-    <p class="ayuda">Verifica tu conexión, o que tu API PHP esté corriendo (XAMPP: Apache + MySQL en verde).</p>
+    <p class="ayuda">Verifica tu conexión, la IP en Origen de datos, o que tu API PHP esté corriendo (XAMPP: Apache + MySQL en verde).</p>
   </div>
 
   <!-- Estado: vacío -->
@@ -67,7 +67,55 @@
       <div class="fecha">
         <ion-icon name="time-outline"></ion-icon> {{ c.created_at }}
       </div>
+
+      <!-- Acciones: PATCH (editar) y DELETE (eliminar) -->
+      <div class="acciones">
+        <button type="button" class="btn-accion" (click)="abrirEditar(c)" [disabled]="!puedeModificar"
+                [attr.aria-label]="'Editar a ' + c.nombre">
+          <ion-icon name="create-outline"></ion-icon> Editar
+        </button>
+        <button type="button" class="btn-accion peligro" (click)="eliminar(c)" [disabled]="!puedeModificar"
+                [attr.aria-label]="'Eliminar a ' + c.nombre">
+          <ion-icon name="trash-outline"></ion-icon> Eliminar
+        </button>
+      </div>
     </div>
   </div>
+
+  <!-- Modal de edición (PATCH) -->
+  <ion-modal [isOpen]="modalEditarAbierto" (didDismiss)="cerrarModalEditar()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Editar contacto</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalEditar()">Cancelar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form class="form-editar" [formGroup]="editForm" (ngSubmit)="guardarEdicion()">
+          <label for="e-nombre">Nombre</label>
+          <input id="e-nombre" type="text" formControlName="nombre">
+
+          <label for="e-empresa">Empresa <span class="opcional">(opcional)</span></label>
+          <input id="e-empresa" type="text" formControlName="empresa">
+
+          <label for="e-email">Correo</label>
+          <input id="e-email" type="email" formControlName="email">
+
+          <label for="e-telefono">Teléfono</label>
+          <input id="e-telefono" type="text" formControlName="telefono">
+
+          <label for="e-mensaje">Mensaje</label>
+          <textarea id="e-mensaje" rows="4" formControlName="mensaje"></textarea>
+
+          <p class="error-edicion" *ngIf="errorEdicion" role="alert">{{ errorEdicion }}</p>
+
+          <button type="submit" class="boton-guardar">Guardar cambios</button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
 </ion-content>
