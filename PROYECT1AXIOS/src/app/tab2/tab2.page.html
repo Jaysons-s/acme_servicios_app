@@ -1,6 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Contactos Recibidos</ion-title>
+    <ion-buttons slot="end">
+      <app-estado-conexion></app-estado-conexion>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -24,8 +27,42 @@
 
   <div class="encabezado">
     <h1>Contactos recibidos</h1>
-    <p *ngIf="!cargando && !error">{{ contactos.length }} contacto(s) en total</p>
+    <p *ngIf="!cargando && !error">{{ contactos.length }} contacto(s) en el servidor</p>
+    <p class="ultima-sync" *ngIf="sync.ultimaSync() as ultima">
+      Última sincronización: {{ ultima | date:'dd/MM/yyyy HH:mm' }}
+    </p>
   </div>
+
+  <!-- Pendientes de sincronizar: guardados en el dispositivo, aún no están en el servidor -->
+  <section class="pendientes" *ngIf="sync.cola().length > 0" aria-label="Contactos pendientes de sincronizar">
+    <div class="pendientes-header">
+      <h2><ion-icon name="cloud-upload-outline"></ion-icon> Pendientes de sincronizar ({{ sync.cola().length }})</h2>
+      <button type="button" class="btn-sync" (click)="sincronizarAhora()"
+              [disabled]="sync.sincronizando() || sync.pendientes() === 0">
+        <ion-icon name="sync-outline"></ion-icon>
+        {{ sync.sincronizando() ? 'Sincronizando…' : 'Sincronizar ahora' }}
+      </button>
+    </div>
+
+    <div class="pendiente" *ngFor="let p of sync.cola()" [class.con-error]="p.estado === 'error'">
+      <div class="pendiente-info">
+        <strong>{{ p.contacto.nombre }}</strong>
+        <span *ngIf="p.contacto.empresa"> · {{ p.contacto.empresa }}</span>
+        <p class="pendiente-msg">"{{ p.contacto.mensaje }}"</p>
+        <p class="pendiente-estado" *ngIf="p.estado === 'pendiente'">
+          En espera de conexión · guardado {{ p.creadoEn | date:'dd/MM HH:mm' }}
+          <span *ngIf="p.intentos > 0">· {{ p.intentos }} intento(s)</span>
+        </p>
+        <p class="pendiente-estado error" *ngIf="p.estado === 'error'" role="alert">
+          Rechazado por el servidor: {{ p.mensajeError }}
+        </p>
+      </div>
+      <div class="pendiente-acciones">
+        <button type="button" class="btn-mini" *ngIf="p.estado === 'error'" (click)="reintentarPendiente(p.idLocal)">Reintentar</button>
+        <button type="button" class="btn-mini peligro" (click)="descartarPendiente(p.idLocal, p.contacto.nombre)">Descartar</button>
+      </div>
+    </div>
+  </section>
 
   <!-- Estado: cargando (GET) -->
   <div class="estado" *ngIf="cargando">
@@ -40,7 +77,7 @@
   </div>
 
   <!-- Estado: vacío -->
-  <div class="estado" *ngIf="!cargando && !error && contactos.length === 0">
+  <div class="estado" *ngIf="!cargando && !error && contactos.length === 0 && sync.cola().length === 0">
     <p>Todavía no hay contactos guardados.</p>
     <p class="ayuda">Ve al formulario del Tab1 y envía uno de prueba.</p>
   </div>

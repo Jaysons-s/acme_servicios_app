@@ -272,3 +272,113 @@
     &:focus-visible { background: var(--navy); outline: 0; }
   }
 }
+
+
+.ultima-sync {
+  margin-top: 0.15rem !important;
+  font-size: 0.75rem !important;
+}
+
+.pendientes {
+  margin: 0.75rem 1.25rem 0;
+  padding: 0.9rem 1rem;
+  background: #FFF9EE;
+  border: 1px solid #FFE0A3;
+  border-radius: 6px;
+}
+
+.pendientes-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #8A5A00;
+  }
+}
+
+.btn-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible { background: var(--navy); outline: 0; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.pendiente {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid #FFE0A3;
+  font-size: 0.85rem;
+  color: var(--navy);
+
+  &.con-error { border-top-color: #F5C6C2; }
+
+  .pendiente-info { min-width: 0; flex: 1; }
+
+  .pendiente-msg {
+    margin: 0.2rem 0 0;
+    font-style: italic;
+    color: var(--slate);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pendiente-estado {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    color: #8A5A00;
+
+    &.error { color: #B3261E; }
+  }
+}
+
+.pendiente-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.btn-mini {
+  padding: 0.3rem 0.65rem;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--blue);
+  background: #fff;
+  border: 1px solid var(--blue);
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  &.peligro {
+    color: #B3261E;
+    border-color: #B3261E;
+    &:focus-visible { outline-color: #B3261E; }
+  }
+}

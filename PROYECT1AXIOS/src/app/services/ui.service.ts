@@ -26,13 +26,13 @@ export class UiService {
     }
   }
 
-  // Aviso corto en la parte de abajo (verde = éxito, rojo = error)
-  async toast(mensaje: string, tipo: 'exito' | 'error' = 'exito'): Promise<void> {
+  // Aviso corto en la parte de abajo (verde = éxito, rojo = error, amarillo = aviso)
+  async toast(mensaje: string, tipo: 'exito' | 'error' | 'aviso' = 'exito'): Promise<void> {
     const toast = await this.toastCtrl.create({
       message: mensaje,
-      duration: tipo === 'exito' ? 2200 : 3500,
+      duration: tipo === 'exito' ? 2500 : 3500,
       position: 'bottom',
-      color: tipo === 'exito' ? 'success' : 'danger'
+      color: tipo === 'exito' ? 'success' : tipo === 'error' ? 'danger' : 'warning'
     });
     await toast.present();
   }

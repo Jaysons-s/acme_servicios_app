@@ -11,9 +11,11 @@ import {
   personOutline, businessOutline, mailOutline, callOutline, chatbubbleOutline,
   locationOutline, cloudOfflineOutline
 } from 'ionicons/icons';
-import { ContactoService, Contacto } from '../services/contacto.service';
+import { ContactoService, Contacto, ErrorApi } from '../services/contacto.service';
 import { ConectividadService } from '../services/conectividad.service';
 import { UiService } from '../services/ui.service';
+import { SyncService } from '../services/sync.service';
+import { EstadoConexionComponent } from '../shared/estado-conexion.component';
 
 @Component({
   selector: 'app-tab1',
@@ -24,7 +26,8 @@ import { UiService } from '../services/ui.service';
     CommonModule,
     ReactiveFormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonIcon,
-    IonModal, IonButtons, IonButton
+    IonModal, IonButtons, IonButton,
+    EstadoConexionComponent
   ],
 })
 export class Tab1Page implements OnInit {
@@ -34,6 +37,7 @@ export class Tab1Page implements OnInit {
 
   modalExitoAbierto = false;
   modalErrorAbierto = false;
+  tituloExito = '¡Éxito!';
   mensajeExito = '';
   mensajeError = '';
 
@@ -41,7 +45,8 @@ export class Tab1Page implements OnInit {
     private fb: FormBuilder,
     private contactoService: ContactoService,
     public conectividad: ConectividadService, // público para leerlo desde el HTML (banner)
-    private ui: UiService
+    private ui: UiService,
+    private sync: SyncService
   ) {
     addIcons({
       'close': close,
@@ -77,37 +82,48 @@ export class Tab1Page implements OnInit {
       return;
     }
 
-    // Verificación explícita de conectividad ANTES de intentar mandar nada.
-    // Un formulario de "crear" no se puede guardar en caché para mandarlo después
-    // (eso sería una mejora futura con una cola de sincronización), así que aquí
-    // avisamos de inmediato en vez de dejar que truene el try/catch de abajo.
-    const hayConexion = await this.conectividad.estaConectado();
-    if (!hayConexion) {
-      this.mensajeError = 'No tienes conexión a internet. Conéctate e intenta enviar de nuevo.';
-      this.modalErrorAbierto = true;
-      return;
-    }
-
+    const nuevoContacto: Contacto = this.contactoForm.value;
     this.enviando = true;
 
-    const nuevoContacto: Contacto = this.contactoForm.value;
-
     try {
-      // POST con el "Loading" de Ionic visible mientras se espera la respuesta
-      const creado = await this.ui.conCarga('Enviando mensaje...', () =>
-        this.contactoService.crearContacto(nuevoContacto)
-      );
+      // 1) Sin red en el dispositivo: se guarda localmente y se enviará al reconectar
+      if (!(await this.conectividad.estaConectado())) {
+        await this.guardarParaDespues(nuevoContacto);
+        return;
+      }
 
-      this.mensajeExito = `¡Gracias ${creado.nombre}! Tu mensaje fue enviado correctamente.`;
-      this.modalExitoAbierto = true;
-
-      this.contactoForm.reset();
-    } catch (error: any) {
-      this.mensajeError = error?.message || 'Ocurrió un error al enviar el formulario.';
-      this.modalErrorAbierto = true;
+      // 2) Hay red: se intenta el POST, con el "Loading" de Ionic visible
+      try {
+        const creado = await this.ui.conCarga('Enviando mensaje...', () =>
+          this.contactoService.crearContacto(nuevoContacto)
+        );
+        this.tituloExito = '¡Enviado!';
+        this.mensajeExito = `¡Gracias ${creado.nombre}! Tu mensaje fue enviado correctamente.`;
+        this.modalExitoAbierto = true;
+        this.contactoForm.reset();
+      } catch (error: any) {
+        if (error instanceof ErrorApi && error.esRed) {
+          // Hay WiFi pero el servidor no responde (IP mal, Apache apagado, timeout...): tampoco se pierde el mensaje
+          await this.guardarParaDespues(nuevoContacto);
+        } else {
+          // El servidor sí respondió y rechazó los datos (ej. 422): eso se corrige, no se guarda para después
+          this.mensajeError = error?.message || 'Ocurrió un error al enviar el formulario.';
+          this.modalErrorAbierto = true;
+        }
+      }
     } finally {
       this.enviando = false;
     }
+  }
+
+  // Guarda el contacto en el dispositivo (cola de sincronización) y avisa al usuario
+  private async guardarParaDespues(contacto: Contacto) {
+    await this.sync.guardarOffline(contacto);
+    this.tituloExito = 'Guardado sin conexión';
+    this.mensajeExito =
+      'No hay conexión con el servidor. Tu mensaje se guardó en este dispositivo y se enviará solo cuando vuelva la conexión.';
+    this.modalExitoAbierto = true;
+    this.contactoForm.reset();
   }
 
   cerrarModalExito() {
