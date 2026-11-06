@@ -1,0 +1,39 @@
+PERSISTENCIA DE DATOS — PROMPTS UTILIZADOS CON IA
+Link de GitHub
+https://github.com/Jaysons-s/acme_servicios_app.git
+
+Objetivo:
+Agregar almacenamiento local para evitar que la información desaparezca al cerrar la aplicación, sin utilizar un servidor.
+
+Tecnología elegida:
+Se utilizó Capacitor Preferences porque es sencilla de implementar y permite guardar información localmente en navegador y dispositivos móviles.
+
+PROMPTS UTILIZADOS
+
+Prompt 1:
+"Agregar persistencia para evitar que la información desaparezca al cerrar la aplicación. Puede utilizarse, según el proyecto: Ionic Storage, Preferences, SQLite, almacenamiento de archivos."
+
+Uso: Se pidió a la IA proponer una solución de persistencia local y se eligió Capacitor Preferences, aplicándolo en una nueva pantalla llamada Tab3.
+
+Prompt 2:
+"Como puedo revisar que si haya persistencia?."
+
+Uso: Se utilizó para comprobar que las notas realmente se guardaran después de cerrar y volver a abrir la aplicación.
+
+QUÉ SE ACEPTÓ, MODIFICÓ O DESCARTÓ
+
+Aceptado: nota.service.ts con las operaciones de agregar, consultar, modificar y eliminar notas.
+
+Aceptado: ion-item-sliding para eliminar notas deslizando.
+
+Modificado: No fue necesario realizar cambios importantes al código generado.
+
+Descartado: No se aplicó persistencia local a los contactos porque ya utilizan persistencia remota mediante MySQL.
+
+PRUEBAS REALIZADAS
+
+1. Se agregó una nota en Tab3.
+2. Se cerró completamente la aplicación.
+3. Se volvió a abrir y se comprobó que la nota permanecía.
+4. Se verificó la información guardada en Local Storage mediante DevTools.
+5. Se grabó un video mostrando agregar, cerrar, reabrir, editar y eliminar una nota.
