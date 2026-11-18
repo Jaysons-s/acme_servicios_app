@@ -1,0 +1,86 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Ubicación</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ubicacion-content">
+  <div class="contenedor">
+
+    <div class="encabezado">
+      <h1>Sucursal más cercana</h1>
+      <p>Descubre cuál sucursal de Acme Servicios te queda más cerca.</p>
+    </div>
+
+    <!-- 1) Antes de pedir el permiso: se explica para qué se usa -->
+    <section class="card" *ngIf="estado() === 'inicial'">
+      <h2><ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon> Antes de pedirte el permiso</h2>
+      <ul class="lista-privacidad">
+        <li>Usamos tu ubicación solo para calcular la distancia a nuestras sucursales.</li>
+        <li>No se guarda ni se envía a ningún servidor.</li>
+        <li>Puedes rechazarla: el resto de la aplicación sigue funcionando.</li>
+      </ul>
+      <button type="button" class="btn-primario" (click)="obtener()">
+        <ion-icon name="location-outline" aria-hidden="true"></ion-icon> Obtener mi ubicación
+      </button>
+    </section>
+
+    <!-- 2) Obteniendo la posición (el GPS puede tardar unos segundos) -->
+    <div class="estado" *ngIf="estado() === 'cargando'" role="status">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Obteniendo tu ubicación…</p>
+      <p class="ayuda">Puede tardar unos segundos. Si Android te pregunta, elige «Permitir».</p>
+    </div>
+
+    <!-- 3) Error o permiso rechazado -->
+    <section class="card error" *ngIf="estado() === 'error' && error() as e" role="alert">
+      <h2><ion-icon name="warning-outline" aria-hidden="true"></ion-icon> {{ e.titulo }}</h2>
+      <p>{{ e.mensaje }}</p>
+      <button type="button" class="btn-primario" (click)="obtener()">
+        <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon> Intentar de nuevo
+      </button>
+    </section>
+
+    <!-- 4) Resultado -->
+    <div *ngIf="estado() === 'listo' && coordenadas() as c" aria-live="polite">
+
+      <section class="card">
+        <h2><ion-icon name="location-outline" aria-hidden="true"></ion-icon> Tu ubicación</h2>
+        <dl class="coordenadas">
+          <div><dt>Latitud</dt><dd>{{ coordenada(c.latitud) }}</dd></div>
+          <div><dt>Longitud</dt><dd>{{ coordenada(c.longitud) }}</dd></div>
+          <div><dt>Precisión</dt><dd>{{ c.precision !== null ? '± ' + (c.precision | number:'1.0-0') + ' m' : 'No disponible' }}</dd></div>
+          <div><dt>Hora</dt><dd>{{ hora() }}</dd></div>
+        </dl>
+        <p class="aviso" *ngIf="modo() === 'aproximada'">
+          No se logró una ubicación exacta (GPS), así que se usó una aproximada. La distancia puede variar un poco.
+        </p>
+      </section>
+
+      <section class="card destacada" *ngIf="masCercana() as s">
+        <p class="etiqueta">Tu sucursal más cercana</p>
+        <h2><ion-icon name="business-outline" aria-hidden="true"></ion-icon> {{ s.nombre }}</h2>
+        <p class="direccion">{{ s.direccion }}</p>
+        <p class="distancia">{{ distancia(s.distanciaM) }} <span>hacia el {{ s.rumbo }}</span></p>
+        <a class="btn-primario" [href]="comoLlegar(s)" target="_blank" rel="noopener">
+          <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon> Cómo llegar
+        </a>
+      </section>
+
+      <section class="card" *ngIf="otras().length > 0">
+        <h2>Otras sucursales</h2>
+        <ul class="lista-sucursales">
+          <li *ngFor="let s of otras()">
+            <span class="nombre">{{ s.nombre }}</span>
+            <span class="dist">{{ distancia(s.distanciaM) }} · {{ s.rumbo }}</span>
+          </li>
+        </ul>
+      </section>
+
+      <button type="button" class="btn-secundario" (click)="obtener()">
+        <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon> Actualizar mi ubicación
+      </button>
+    </div>
+
+  </div>
+</ion-content>
